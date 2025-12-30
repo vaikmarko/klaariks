@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { BriefcaseMedical, CheckCircle2, Smartphone, FileCheck, Edit3, X, FileText, TrendingUp, AlertTriangle, User, Users, Landmark, Heart } from 'lucide-react';
+import { BriefcaseMedical, CheckCircle2, Smartphone, FileCheck, X, FileText, TrendingUp, AlertTriangle, User, Users, Heart } from 'lucide-react';
 
 export const Simulator: React.FC = () => {
   // State
@@ -13,15 +13,13 @@ export const Simulator: React.FC = () => {
   const [contractContent, setContractContent] = useState('');
 
   // Estonian Tax Constants 2024
-  const MIN_WAGE = 820;
   const MIN_SOCIAL_TAX_BASE = 725;
-  const AVERAGE_WAGE = 1800; // Approx
   
   // Update name default when toggling
   useEffect(() => {
      if (employeeName === 'Mina Ise' && contractType === 'employee') setEmployeeName('Uus Töötaja');
      if (employeeName === 'Uus Töötaja' && contractType === 'board_member') setEmployeeName('Mina Ise');
-  }, [contractType]);
+  }, [contractType, employeeName]);
 
   // Calculate Taxes
   const taxes = useMemo(() => {
@@ -34,7 +32,6 @@ export const Simulator: React.FC = () => {
     }
     
     // Ensure accurate Social Tax Base check
-    const socialTaxBase = Math.max(gross, MIN_SOCIAL_TAX_BASE);
     const hasHealthInsurance = gross >= MIN_SOCIAL_TAX_BASE;
 
     const socialTax = Math.max(gross, MIN_SOCIAL_TAX_BASE) * 0.33;

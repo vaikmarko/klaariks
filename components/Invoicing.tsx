@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MOCK_INVOICES } from '../constants';
-import { Plus, Download, Send, Eye, Sparkles, Check, X, FileText, ArrowRight, Printer } from 'lucide-react';
+import { Plus, Download, Send, Eye, Sparkles, X, FileText, Printer } from 'lucide-react';
 import { Invoice } from '../types';
 
 // Mock data for AI suggestions
@@ -123,7 +123,7 @@ export const Invoicing: React.FC = () => {
          {['all', 'unpaid', 'drafts'].map((tab) => (
              <button
                 key={tab}
-                onClick={() => setActiveTab(tab as any)}
+                onClick={() => setActiveTab(tab as 'all' | 'unpaid' | 'drafts')}
                 className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
              >
                  {tab === 'all' ? 'Kõik' : tab === 'unpaid' ? 'Maksmata' : 'Mustandid'}

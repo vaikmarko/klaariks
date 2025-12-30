@@ -101,7 +101,7 @@ export const getFinancialAdvice = async (cash: number, expenses: number, dividen
       `
     });
     return response.text || "";
-  } catch (e) {
+  } catch {
     return "Hetkel ei saa nõuandeid genereerida.";
   }
 }
