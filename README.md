@@ -63,14 +63,5 @@ klaariks/
 
 ## Koostöö
 
-Vaata [CONTRIBUTING.md](CONTRIBUTING.md) faili koostöö juhiste jaoks.
-
-## Git töövoog
-
-Projektis kasutame Git Flow lähenemist:
-- `main` - tootmisvalmis kood
-- `develop` - arendusharu
-- `feature/*` - uued funktsioonid
-- `fix/*` - vea parandused
-
-Loo uue funktsiooni jaoks haru `develop`-st ja tee Pull Request, kui oled valmis.
+- **Git töövoog:** Vaata [GIT_WORKFLOW.md](GIT_WORKFLOW.md) faili
+- **Koostöö reeglid:** Vaata [CONTRIBUTING.md](CONTRIBUTING.md) faili
