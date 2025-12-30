@@ -63,5 +63,4 @@ klaariks/
 
 ## Koostöö
 
-- **Git töövoog:** Vaata [GIT_WORKFLOW.md](GIT_WORKFLOW.md) faili
-- **Koostöö reeglid:** Vaata [CONTRIBUTING.md](CONTRIBUTING.md) faili
+Vaata [CONTRIBUTING.md](CONTRIBUTING.md) faili koostöö juhiste jaoks (Git töövoog, koodi standardid, commit formaat).
