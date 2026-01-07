@@ -1,383 +1,461 @@
-# KLAARIKS MVP - Kasutajateekond ja Integratsioonid
+# KLAARIKS v0 — Kasutajateekond
 
-## 🎯 MVP Eesmärk (1 kuu)
-
-Saada üles töötav teenus, kus:
-1. Kasutaja saab registreeruda oma ettevõttega
-2. Ettevõtte andmed tulevad automaatselt Äriregistrist
-3. Lihtne pangaühendus (alguses manuaalne CSV import)
-4. Põhilised finantsvaated toimivad
+> Põhineb PRD v0-l: AI-assisted accounting for Estonian micro-businesses
 
 ---
 
-## 📋 Kasutajateekonna Faasid
+## 🎯 v0 Eesmärk
 
-### FAAS 1: Registreerimine ja Ettevõtte Sidumine (MVP)
+**Validatsiooni MVP**, mis:
+- Toob reaalset väärtust reaalsetele ettevõtetele
+- Saab kasutada sisemiselt raamatupidamisbürooga
+- Tõestab automatiseerimise + UX oletusi enne avalikku launchit
+- On turvaline, selgitatav ja skaleeritav disainilt
+
+**See EI OLE launch PRD. See on validation PRD.**
+
+---
+
+## 👤 Sihtgrupp (v0)
+
+### Esmane kasutaja
+- Väikeettevõtte omanik (1–3 inimest OÜ)
+- **Ei ole** raamatupidaja
+- Tahab selgust ja meelerahu, mitte raamatupidamisteooriat
+- Teeb igapäevast arvestust kui juhendatud turvaliselt
+
+### Teisene kasutaja
+- Professionaalne raamatupidaja (valikuline)
+- Kasutab ülevaatuseks, parandamiseks või aastaaruandeks
+- Vajab puhtaid exporte ja jälgitavust
+- **Ei opereeri** süsteemi igapäevaselt
+
+---
+
+## 🚫 Mida v0 EI TEE (lukus)
+
+| Välja jäetud | Põhjus |
+|--------------|--------|
+| Igapäevane raamatupidaja nõue | Owner-first |
+| e-MTA esitamine | v1+ |
+| Laohaldus | Scope |
+| Palgaarvestus | Scope |
+| Projektid / objektid | Scope |
+| Mitu ettevõtet kontol | v1+ |
+| Avalik self-serve onboarding | v1+ |
+
+---
+
+## 📋 Kasutajateekond (v0)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  1. KASUTAJA SISSELOGIMINE                                      │
-│     ├── ID-kaart / Mobiil-ID / Smart-ID                         │
-│     └── Saame: isikukood, nimi                                  │
-│                                                                 │
-│  2. ETTEVÕTTE VALIMINE                                          │
-│     ├── Äriregister API päring isikukoodi järgi                 │
-│     ├── Kuvatakse: ettevõtted kus isik on seotud                │
-│     │   - Juhatuse liige                                        │
-│     │   - Osanik                                                │
-│     │   - Prokurist                                             │
-│     └── Kasutaja valib ettevõtte                                │
-│                                                                 │
-│  3. ETTEVÕTTE ANDMETE KINNITUS                                  │
-│     ├── Ärinimi                                                 │
-│     ├── Registrikood                                            │
-│     ├── KMKR number (kui käibemaksukohuslane)                   │
-│     ├── Aadress                                                 │
-│     └── Tegevusalad (EMTAK koodid)                              │
-│                                                                 │
-│  4. TEENUSE TINGIMUSED                                          │
-│     ├── Kasutustingimuste aktsepteerimine (checkbox)            │
-│     ├── Privaatsuspoliitika (checkbox)                          │
-│     └── (Hiljem: DigiDoc allkiri)                               │
-│                                                                 │
-│  5. TERE TULEMAST!                                              │
-│     └── Dashboard                                               │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │  1. AUTENTIMINE                                                  │   │
+│  │     ├── Smart-ID / Mobiil-ID / ID-kaart (eelistatud)            │   │
+│  │     └── Alternatiiv: email magic link (avatud otsus)            │   │
+│  │                                                                  │   │
+│  │  Saame: isikukood, nimi, e-post                                 │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │  2. ETTEVÕTTE LOOMINE / SIDUMINE                                │   │
+│  │     ├── Äriregistri otsing (registrikoodi järgi)                │   │
+│  │     ├── Valideerime: ettevõte eksisteerib                       │
+│  │     ├── Kuvame: nimi, reg.kood, KMKR staatus, aadress           │   │
+│  │     └── Kasutaja kinnitab: "See on minu ettevõte"               │   │
+│  │                                                                  │   │
+│  │  ⚠️ v0: 1 konto = 1 ettevõte (kõva reegel)                      │   │
+│  │  ⚠️ v0: 1 esmane kasutaja = ettevõtte omanik                    │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │  3. TINGIMUSTE NÕUSTUMINE                                       │   │
+│  │     ├── Kasutustingimused ✓                                     │   │
+│  │     ├── Privaatsuspoliitika ✓                                   │   │
+│  │     └── Andmetöötluse nõusolek ✓                                │   │
+│  │                                                                  │   │
+│  │  v0: Checkbox-põhine (mitte DigiDoc)                            │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │  4. DASHBOARD / ATTENTION SYSTEM                                │   │
+│  │                                                                  │   │
+│  │     Kolm olekut:                                                │   │
+│  │     🟢 ALL GOOD      - Kõik töödeldud, probleeme pole           │   │
+│  │     🟡 NEEDS ATTENTION - Puudub dokument, madal kindlus         │   │
+│  │     🔴 BLOCKED       - Kriitiline ebakindlus, nõuab sisendit    │   │
+│  │                                                                  │   │
+│  │     Üks nimekiri:                                               │   │
+│  │     • Puuduvad dokumendid                                       │   │
+│  │     • Madala kindlusega arved                                   │   │
+│  │     • Sobitamata maksed                                         │   │
+│  │     • Eelseisvad KM kohustused (informatiivne)                  │   │
+│  │                                                                  │   │
+│  │     ❌ EI OLE dashboarde - ainult attention list                │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │  5. IGAPÄEVANE TÖÖ                                              │   │
+│  │                                                                  │   │
+│  │  A) Dokumentide üleslaadimine                                   │   │
+│  │     ├── Ostuarved (PDF, pilt)                                   │   │
+│  │     ├── Müügiarved (import, mitte loomine)                      │   │
+│  │     └── Pangaväljavõtted (CSV, PDF, XML)                        │   │
+│  │                                                                  │   │
+│  │  B) AI ekstraktsioon (assisteeriv)                              │   │
+│  │     ├── Tarnija, kuupäev, summa, KM                             │   │
+│  │     ├── Kindlusaste: High / Medium / Low                        │   │
+│  │     └── ⚠️ MITTE KUNAGI auto-commit vaikselt                    │   │
+│  │                                                                  │   │
+│  │  C) Kategoriseerimine                                           │   │
+│  │     ├── Soovita konto (kontoplaan)                              │   │
+│  │     ├── Soovita KM käsitlus                                     │   │
+│  │     ├── Kiire override                                          │   │
+│  │     └── Meelespea: õpib override'idest                          │   │
+│  │                                                                  │   │
+│  │  D) Panga sobitamine                                            │   │
+│  │     ├── Sobita tehingud arvetega                                │   │
+│  │     ├── Tuvasta puuduvad arved                                  │   │
+│  │     └── Näita sobitamise põhjendust                             │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │  6. RAAMATUPIDAJA HANDOFF (valikuline)                          │   │
+│  │                                                                  │   │
+│  │  Kutsu raamatupidaja (email invite):                            │   │
+│  │     └── Read-only ligipääs                                      │   │
+│  │                                                                  │   │
+│  │  Export ZIP arhiiv:                                             │   │
+│  │     ├── Originaaldokumendid                                     │   │
+│  │     ├── Pearaamatu eksport                                      │   │
+│  │     ├── Päeviku eksport                                         │   │
+│  │     └── KM kokkuvõtte eelvaade                                  │   │
+│  │                                                                  │   │
+│  │  v0: Info handoff, mitte in-app editing                         │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🏛️ Äriregistri Integratsioon
+## 🏛️ Äriregistri Integratsioon (v0)
 
-### Andmete Pärimine
+### Nõue PRD-st:
+> "Company creation should use Estonian business registry lookup (required for real customers)"
 
-**Allikas:** Registrite ja Infosüsteemide Keskus (RIK)
-**Teenus:** Äriregistri avalikud andmed / X-tee teenused
-
-### Variant A: Avalik Otsing (MVP jaoks piisav)
-
-```typescript
-// Registrikoodi järgi otsimine
-GET https://ariregister.rik.ee/est/company/{registrikood}/general
-
-// Tagastab:
-{
-  "nimi": "Muaree OÜ",
-  "registrikood": "12345678",
-  "oiguslikkVorm": "Osaühing",
-  "staatus": "Registrisse kantud",
-  "registreerimisKp": "2020-01-15",
-  "aadress": "Tallinn, Kesklinna linnaosa, Narva mnt 5",
-  "kmkrNr": "EE123456789",
-  "tegevusalad": [
-    { "emtak": "62011", "nimetus": "Programmeerimine" }
-  ]
-}
-```
-
-### Variant B: Isikukoodi järgi seotud ettevõtted (X-tee)
-
-```typescript
-// X-tee päring - nõuab liitumislepingut
-// Tagastab kõik ettevõtted, kus isik on:
-// - Juhatuse liige
-// - Osanik (osalus > 0%)
-// - Prokurist
-// - Likvideerija
-
-interface SeotudEttevote {
-  registrikood: string;
-  nimi: string;
-  roll: 'juhatuse_liige' | 'osanik' | 'prokurist' | 'likvideerija';
-  alates: string;
-  osalusProtsent?: number;
-}
-```
-
-### MVP Lahendus (ilma X-teeta)
-
-Kuna X-tee liitumine võtab aega (~2-4 nädalat), siis MVP jaoks:
-
-1. **Kasutaja sisestab registrikoodi käsitsi**
-2. **Valideerime avalikust registrist**
-3. **Kasutaja kinnitab, et on seotud isik**
-4. **Hilisemas faasis:** automaatne kontroll X-tee kaudu
-
-```typescript
-// MVP onboarding flow
-const onboardingSteps = [
-  'smart_id_login',      // Saame isikukoodi
-  'enter_reg_code',      // Kasutaja sisestab
-  'verify_company',      // Äriregistri päring
-  'confirm_role',        // "Olen juhatuse liige / volitatud isik"
-  'accept_terms',        // Tingimused
-  'setup_complete'       // Valmis!
-];
-```
-
----
-
-## 📝 Lepingud ja Allkirjad
-
-### MVP Faas (Lihtsustatud)
-
-| Dokument | Allkirjastamine | Märkused |
-|----------|-----------------|----------|
-| Kasutustingimused | Checkbox | "Nõustun tingimustega" |
-| Privaatsuspoliitika | Checkbox | GDPR nõuded |
-| Andmetöötluse nõusolek | Checkbox | Pangaandmete jaoks |
-
-### Faas 2 (Täielik)
-
-| Dokument | Allkirjastamine | Märkused |
-|----------|-----------------|----------|
-| Teenuse leping | DigiDoc | Juriidiliselt siduv |
-| Volikiri EMTA-le | DigiDoc | Maksuandmete pärimiseks |
-| Volikiri pangale | Panga süsteemis | Open Banking nõusolek |
-| Andmetöötleja leping | DigiDoc | B2B klientidele |
-
----
-
-## 🔐 Volikirjad ja Volitused
-
-### EMTA (Maksu- ja Tolliamet)
-
-**Mis on vaja:** Õigus pärida ja esitada andmeid ettevõtte nimel
-
-**Protsess:**
-1. Ettevõtte esindaja logib sisse e-MTA-sse
-2. Minu Seaded → Volitused → Lisa volitus
-3. Sisestab KLAARIKS OÜ registrikoodi
-4. Valib õigused:
-   - Deklaratsioonide vaatamine
-   - Deklaratsioonide esitamine
-   - Maksukonto info
-
-**Alternatiiv:** Digitaalselt allkirjastatud volikiri
-- Vorm: vabas vormis, peab sisaldama:
-  - Volitaja andmed (ettevõte + esindaja)
-  - Volitatu andmed (KLAARIKS OÜ)
-  - Volituse ulatus
-  - Kehtivusaeg
-  - Allkirjad (DigiDoc)
-
-```
-VOLIKIRI
-
-[Ettevõtte nimi], registrikood [XXXXXXXX], 
-esindaja [Nimi], isikukood [XXXXXXXXXXX]
-
-volitab
-
-KLAARIKS OÜ, registrikood [XXXXXXXX]
-
-järgmistes toimingutes:
-- Maksudeklaratsioonide andmete pärimine
-- Maksukonto seisu pärimine
-- [Muud toimingud]
-
-Volitus kehtib: [kuupäev] kuni [kuupäev] / tähtajatult
-
-[Digitaalallkirjad]
-```
-
-### Pangad (Open Banking - PSD2)
-
-**Eestis tegutsevad pangad ja nende lahendused:**
-
-| Pank | Lahendus | Liitumisaeg | Märkused |
-|------|----------|-------------|----------|
-| **LHV** | LHV Connect API | ~2 nädalat | Lihtne liitumine |
-| **Swedbank** | Open Banking API | ~4 nädalat | Sandbox olemas |
-| **SEB** | SEB API | ~4 nädalat | Korporatiivne protsess |
-| **Coop** | Coop API | ~4 nädalat | Väiksem kasutajaskond |
-
-**MVP Lahendus (ilma PSD2 litsentsita):**
-
-1. **Manuaalne eksport** - kasutaja laeb alla CSV/PDF
-2. **KLAARIKS parsib** - automaatne töötlus
-3. **Hiljem:** AISP litsents või partnerlus
-
-**PSD2 Integratsioon (Faas 2):**
-
-```typescript
-// Kasutaja annab nõusoleku panga süsteemis
-const consentFlow = {
-  1: 'Redirect pangalehele',
-  2: 'Kasutaja autendib (Smart-ID)',
-  3: 'Kasutaja kinnitab ligipääsu',
-  4: 'Pank tagastab access_token',
-  5: 'KLAARIKS pärib andmeid (90 päeva)'
-};
-
-// Consent kehtib 90 päeva, siis uuendamine
-```
-
-### Raamatupidamisteenused (valikuline)
-
-Kui klient soovib, et KLAARIKS edastaks andmeid raamatupidajale:
-
-**Vajalik:**
-- Kliendi nõusolek (checkbox või DigiDoc)
-- Raamatupidaja e-posti kinnitus
-- Andmeedastuse leping
-
----
-
-## 🛠️ MVP Tehniline Implementatsioon
-
-### Onboarding Komponendi Uuendamine
-
-```typescript
-// types.ts - lisa uued tüübid
-export interface OnboardingState {
-  step: 'login' | 'company' | 'verify' | 'terms' | 'bank' | 'complete';
-  user: {
-    idCode: string;
-    name: string;
-    authMethod: 'smart_id' | 'mobile_id' | 'id_card';
-  } | null;
-  company: CompanyProfile | null;
-  consents: {
-    terms: boolean;
-    privacy: boolean;
-    dataProcessing: boolean;
-  };
-}
-
-export interface CompanyProfile {
-  name: string;
-  regCode: string;
-  legalForm: string;
-  status: string;
-  vatNumber?: string;
-  address: string;
-  activities: Array<{
-    emtak: string;
-    name: string;
-  }>;
-}
-```
-
-### Äriregistri Service
+### Implementatsioon
 
 ```typescript
 // services/businessRegistryService.ts
 
-const ARIREGISTER_BASE = 'https://ariregister.rik.ee';
-
-export interface CompanySearchResult {
+interface CompanyLookupResult {
   found: boolean;
   company?: {
-    name: string;
-    regCode: string;
-    legalForm: string;
-    status: string;
-    vatNumber?: string;
-    address: string;
-    registrationDate: string;
-    activities: Array<{ emtak: string; name: string }>;
+    registryCode: string;      // Registrikood
+    name: string;              // Ärinimi
+    legalForm: string;         // Õiguslik vorm (OÜ, AS, FIE)
+    status: string;            // Staatus
+    vatRegistered: boolean;    // Käibemaksukohuslane
+    vatNumber?: string;        // KMKR number
+    address: string;           // Aadress
+    registrationDate: string;  // Registreerimise kuupäev
   };
   error?: string;
 }
 
-export async function searchCompanyByRegCode(
-  regCode: string
-): Promise<CompanySearchResult> {
-  // MVP: Simuleeritud vastus
-  // TODO: Integreeri päris API-ga
-  
-  // Valideeri registrikoodi formaat (8 numbrit)
-  if (!/^\d{8}$/.test(regCode)) {
-    return {
-      found: false,
-      error: 'Registrikood peab olema 8-kohaline number'
-    };
-  }
+// Avalik otsing registrikoodi järgi
+async function lookupCompanyByRegCode(regCode: string): Promise<CompanyLookupResult>
 
-  // Päris implementatsioon:
-  // const response = await fetch(`${ARIREGISTER_BASE}/est/company/${regCode}/general`);
-  // const data = await response.json();
-  
-  return {
-    found: true,
-    company: {
-      name: 'Demo Ettevõte OÜ',
-      regCode,
-      legalForm: 'Osaühing',
-      status: 'Registrisse kantud',
-      vatNumber: `EE${regCode}`,
-      address: 'Tallinn, Kesklinna linnaosa',
-      registrationDate: '2020-01-15',
-      activities: [
-        { emtak: '62011', name: 'Programmeerimine' }
-      ]
-    }
+// v0: Kasutaja sisestab registrikoodi
+// v1+: Automaatne otsing isikukoodi järgi (X-tee)
+```
+
+### Äriregistri Andmed
+
+| Väli | Kasutus | Allikas |
+|------|---------|---------|
+| `registry_code` | Ettevõtte identifitseerimine | Äriregister |
+| `name` | Kuvamine | Äriregister |
+| `vat_registered` | KM loogika | Äriregister |
+| `vat_number` | KM deklaratsioonid | Äriregister |
+| `address` | Dokumentatsioon | Äriregister |
+
+### v0 Piirangud
+
+- ❌ Ei kontrolli automaatselt, kas kasutaja on seotud ettevõttega
+- ❌ Ei kasuta X-teed (nõuab liitumislepingut)
+- ✅ Kasutaja kinnitab ise, et on volitatud isik
+- ✅ Valideerime, et ettevõte eksisteerib
+
+---
+
+## 🔐 Lepingud ja Nõusolekud (v0)
+
+### Mida allkirjastada v0-s?
+
+| Dokument | Meetod | Kohustuslik |
+|----------|--------|-------------|
+| Kasutustingimused | Checkbox | ✅ Jah |
+| Privaatsuspoliitika | Checkbox | ✅ Jah |
+| Andmetöötluse nõusolek | Checkbox | ✅ Jah |
+
+### Mida EI OLE vaja v0-s?
+
+| Dokument | Põhjus |
+|----------|--------|
+| EMTA volikiri | Ei esita e-MTA-sse |
+| Pangaühenduse leping | Manuaalne import |
+| DigiDoc lepingud | Checkbox piisab validatsiooniks |
+
+### Consent Data Model
+
+```typescript
+// Vastavalt PRD data modelile
+
+interface ConsentRecord {
+  id: string;
+  userId: string;
+  companyId: string;
+  consentType: 'terms' | 'privacy' | 'data_processing';
+  version: string;           // Dokumendi versioon
+  grantedAt: Date;
+  metadata: {
+    ipAddress: string;
+    userAgent: string;
   };
 }
 ```
 
 ---
 
-## 📅 MVP Ajakava (4 nädalat)
+## 🛡️ UX Turvamudel (Owner-first)
 
-### Nädal 1: Põhistruktuur
-- [ ] Autentimise UI (Smart-ID mock)
-- [ ] Äriregistri päring (simuleeritud)
-- [ ] Onboarding flow
+### Mida omanik SAAB teha
 
-### Nädal 2: Andmete Import
-- [ ] CSV/PDF parsija pangaväljavõtetele
-- [ ] Andmete valideerimine
-- [ ] Põhilised vaated
+✅ Üles laadida ja kustutada dokumente
+✅ Kinnitada või parandada ekstraktitud arve andmeid
+✅ Aktsepteerida või override'ida soovitatud kategooriaid ja KM käsitlusi
+✅ Sobitada või lahti sobitada pangatehinguid
+✅ Vaadata KM ja rahavoo eelvaateid
+✅ Eksportida andmeid raamatupidaja handoff jaoks
 
-### Nädal 3: Dashboard ja Ülevaated
-- [ ] Rahavoo graafikud
-- [ ] Kulude kategoriseerimine
-- [ ] AI assistendi baas
+### Mida omanik EI SAA teha
 
-### Nädal 4: Testimine ja Polish
-- [ ] End-to-end testimine
-- [ ] UI/UX parandused
-- [ ] Dokumentatsioon
-- [ ] Demo-ready versioon
+❌ Käsitsi postitada pearaamatu kandeid
+❌ Otse muuta maksuarvutusi
+❌ Sulgeda arvestusperioode
+❌ Override'ida süsteemi hoiatusi ilma kinnituseta
 
----
+### Kindluse Kommunikatsioon
 
-## 🔮 Järgmised Faasid
+```typescript
+type ConfidenceLabel = 'high' | 'medium' | 'low';
 
-### Faas 2 (2-3 kuud)
-- [ ] X-tee liitumine (Äriregister)
-- [ ] PSD2 pangaintegratsioon
-- [ ] DigiDoc allkirjastamine
-- [ ] EMTA API integratsioon
-
-### Faas 3 (3-6 kuud)
-- [ ] Automaatne raamatupidamine
-- [ ] Maksudeklaratsioonide genereerimine
-- [ ] Arvete e-saatmine
-- [ ] Mobiilirakendus
+// Low confidence ALATI käivitab küsimuse või ülevaatuse ülesande
+// AI soovitab, MITTE KUNAGI otsustab vaikselt
+```
 
 ---
 
-## ❓ Avatud Küsimused
+## 📊 Dokumendi Olekud (v0)
 
-1. **X-tee liitumine** - Kas alustame protsessi paralleelselt?
-2. **PSD2 litsents** - Oma litsents vs partnerlus (nt Nordigen)?
-3. **Autentimine** - Oma lahendus vs SK ID Solutions teenus?
-4. **Hosting** - Eesti serverid (andmekaitse)?
+```
+pending → processing → review → accepted
+                  ↓
+               failed (retryable)
+```
+
+| Olek | Kirjeldus | Kasutaja tegevus |
+|------|-----------|------------------|
+| `pending` | Ootab töötlust | Oodake |
+| `processing` | AI ekstraktib | Oodake |
+| `review` | Vajab ülevaatust | Kontrolli ja kinnita |
+| `accepted` | Kinnitatud | Valmis |
+| `failed` | Ebaõnnestus | Proovi uuesti |
 
 ---
 
-## 📚 Kasulikud Lingid
+## 💾 Data Model (v0 minimaalne)
 
-- [Äriregistri API dokumentatsioon](https://ariregister.rik.ee/api)
-- [e-MTA arendajale](https://www.emta.ee/arendajale)
-- [SK ID Solutions](https://www.skidsolutions.eu/)
-- [LHV Connect](https://partners.lhv.ee/)
-- [Swedbank Open Banking](https://developer.swedbank.com/)
-- [X-tee liitumine](https://www.ria.ee/riigi-infosusteem/x-tee)
+Vastavalt PRD-le:
+
+```typescript
+// 1. Identity & Access
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  authProvider: 'smart_id' | 'mobile_id' | 'email';
+  createdAt: Date;
+}
+
+interface Company {
+  id: string;
+  registryCode: string;
+  name: string;
+  vatRegistered: boolean;
+  createdAt: Date;
+}
+
+interface Membership {
+  id: string;
+  companyId: string;
+  userId: string;
+  role: 'owner' | 'accountant_readonly' | 'viewer';
+  createdAt: Date;
+}
+// v0: enforce 1 owner membership per company in UI/business logic
+
+// 2. Documents
+interface Document {
+  id: string;
+  companyId: string;
+  type: 'purchase_invoice' | 'sales_invoice' | 'receipt' | 'other';
+  source: 'upload' | 'email_future' | 'integration_future';
+  fileKey: string;
+  status: 'pending' | 'processing' | 'review' | 'accepted' | 'failed';
+  issuedAt?: Date;
+  counterpartyName?: string;
+  counterpartyRegCode?: string;
+  currency: string;
+  totalGross?: number;
+  totalVat?: number;
+  totalNet?: number;
+  vatTreatment: 'standard' | 'reverse_charge' | 'exempt' | 'unknown';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 3. Bank Transactions
+interface Transaction {
+  id: string;
+  companyId: string;
+  bankSource: 'manual_import';
+  postedAt: Date;
+  amount: number;
+  currency: string;
+  description: string;
+  counterparty: string;
+  reference?: string;
+  bankAccountIban?: string;
+  createdAt: Date;
+}
+
+// 4. Matching
+interface Match {
+  id: string;
+  companyId: string;
+  documentId: string;
+  transactionId: string;
+  matchType: 'payment' | 'receipt';
+  confidenceLabel: 'high' | 'medium' | 'low';
+  status: 'suggested' | 'confirmed' | 'rejected';
+  createdAt: Date;
+}
+
+// 5. AI Suggestions
+interface Suggestion {
+  id: string;
+  companyId: string;
+  subjectType: 'document' | 'transaction';
+  subjectId: string;
+  suggestionType: 'extraction_field' | 'account_category' | 'vat_treatment' | 'match';
+  payloadJson: object;
+  confidenceLabel: 'high' | 'medium' | 'low';
+  status: 'pending' | 'accepted' | 'overridden';
+  modelVersion: string;
+  createdAt: Date;
+}
+
+// 6. Owner Overrides
+interface OwnerOverride {
+  id: string;
+  companyId: string;
+  subjectType: string;
+  subjectId: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
+  createdAt: Date;
+}
+
+// 7. Audit Events
+interface AuditEvent {
+  id: string;
+  companyId: string;
+  actorUserId?: string;  // null for system
+  eventType: 'upload' | 'parse' | 'suggestion_created' | 'suggestion_accepted' | 
+             'override_created' | 'match_confirmed' | 'export_created';
+  subjectType: string;
+  subjectId: string;
+  payloadJson: object;
+  createdAt: Date;
+}
+```
+
+---
+
+## ✅ v0 Checklist
+
+### Onboarding
+- [ ] Smart-ID/Mobiil-ID autentimine (või magic link alternatiiv)
+- [ ] Äriregistri otsing registrikoodi järgi
+- [ ] Ettevõtte andmete kinnitus
+- [ ] Kasutustingimuste checkbox
+- [ ] Privaatsuspoliitika checkbox
+- [ ] Andmetöötluse nõusolek checkbox
+
+### Core Features
+- [ ] Dokumentide üleslaadimine (PDF, pilt)
+- [ ] Pangaväljavõtete import (CSV, PDF, XML)
+- [ ] AI ekstraktsioon kindlusastmega
+- [ ] Kategoriseerimise soovitused
+- [ ] Panga sobitamine
+- [ ] Attention system (üks nimekiri)
+
+### Outputs
+- [ ] Pearaamatu eksport
+- [ ] Päeviku eksport
+- [ ] KM kokkuvõtte eelvaade
+- [ ] ZIP handoff raamatupidajale
+
+### Safety
+- [ ] Kõik muudatused logitud (AuditEvent)
+- [ ] Low confidence → alati küsimus
+- [ ] Override'id salvestatud
+- [ ] Eelmine soovitus alati nähtav
+
+---
+
+## 🔮 v0 vs v1
+
+| Aspekt | v0 (Validation) | v1 (Public) |
+|--------|-----------------|-------------|
+| Onboarding | Manuaalne, kutsutud | Self-serve |
+| Pangaühendus | CSV/PDF import | PSD2 integratsioon |
+| Arved | Upload | + Email inbox |
+| Raamatupidaja | Export-based | Read-only in-app |
+| Autentimine | Smart-ID / magic link | + rohkem valikuid |
+| Pricing | Pole | Enforced |
+
+---
+
+## ❓ Avatud Otsused (PRD-st)
+
+1. **Autentimine**: Smart-ID vs email magic link vs password + 2FA
+2. **Kontoplaan**: Lihtsad kategooriad vs täis kontoplaan
+3. **KM käsitluse taksonoomia**: Eesti miinimum set v0 jaoks
+4. **Arve vs pank lahknevus**: Reeglid ja eskaleerimine
 
 ---
 
 *Viimati uuendatud: Jaanuar 2026*
+*Põhineb: PRD v0 — AI-assisted accounting for Estonian micro-businesses*

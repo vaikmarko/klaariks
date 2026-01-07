@@ -1,386 +1,328 @@
-# Volikirjad ja Lepingud - Detailne Ülevaade
+# Volikirjad ja Lepingud — v0 vs Tulevased Faasid
 
-## 🎯 Kokkuvõte: Mida Allkirjastada ja Kuhu Esitada
-
-### MVP Faasis (minimaalne)
-
-| # | Dokument | Allkiri | Kuhu | Millal |
-|---|----------|---------|------|--------|
-| 1 | Kasutustingimused | Checkbox | KLAARIKS süsteem | Registreerimisel |
-| 2 | Privaatsuspoliitika | Checkbox | KLAARIKS süsteem | Registreerimisel |
-| 3 | Andmetöötluse nõusolek | Checkbox | KLAARIKS süsteem | Registreerimisel |
-
-### Täisversioonis (Faas 2+)
-
-| # | Dokument | Allkiri | Kuhu | Millal |
-|---|----------|---------|------|--------|
-| 1 | Teenuse leping | DigiDoc | KLAARIKS | Registreerimisel |
-| 2 | Volikiri EMTA-le | DigiDoc | e-MTA või KLAARIKS | Maksuinfo jaoks |
-| 3 | Pangaühenduse nõusolek | Panga süsteem | Pank | Andmete importimisel |
-| 4 | Raamatupidaja volikiri | DigiDoc | KLAARIKS | Valikuline |
+> Põhineb PRD v0-l
 
 ---
 
-## 📋 1. Kasutustingimused (Terms of Service)
+## 🎯 Kokkuvõte
 
-### Sisu
+### v0 — Mida on vaja?
+
+| Dokument | Vajalik v0? | Meetod |
+|----------|-------------|--------|
+| Kasutustingimused | ✅ Jah | Checkbox |
+| Privaatsuspoliitika | ✅ Jah | Checkbox |
+| Andmetöötluse nõusolek | ✅ Jah | Checkbox |
+| EMTA volikiri | ❌ Ei | — |
+| Panga volikiri/consent | ❌ Ei | — |
+| DigiDoc leping | ❌ Ei | — |
+
+### Miks nii lihtne?
+
+PRD ütleb selgelt:
+- **v0 ei esita midagi e-MTA-sse** → EMTA volikirja pole vaja
+- **v0 kasutab manuaalset importi** → Panga consent'i pole vaja
+- **v0 on validation MVP** → Checkbox piisab juriidiliseks kaitseks
+
+---
+
+## 📋 v0 Nõusolekud (Detail)
+
+### 1. Kasutustingimused (Terms of Service)
 
 ```markdown
 KLAARIKS KASUTUSTINGIMUSED
 
 1. TEENUSE KIRJELDUS
-   - KLAARIKS on finantsülevaate platvorm
-   - Pakume: arvestust, ülevaateid, simulatsioone
-   - EI paku: juriidilist ega maksunõustamist
+   KLAARIKS on AI-toega raamatupidamise abivahend Eesti 
+   mikroettevõtetele. Teenus aitab:
+   - Dokumente üles laadida ja töödelda
+   - Tehinguid kategoriseerida
+   - Ülevaadet saada finantsseisust
+   
+   KLAARIKS EI OLE litsentseeritud raamatupidamisteenus 
+   ega maksunõustaja.
 
 2. KASUTAJA KOHUSTUSED
-   - Esitada õiged andmed
+   - Esitada tõeseid andmeid
    - Hoida ligipääsuandmeid turvaliselt
-   - Mitte jagada kontot kolmandatele isikutele
+   - Mitte kasutada teenust ebaseaduslikult
+   - Kinnitada ekstraktitud andmete õigsust
 
-3. TEENUSEPAKKUJA KOHUSTUSED
-   - Andmete turvaline säilitamine
-   - Teenuse kättesaadavus (99%)
-   - Teavitamine muudatustest
+3. AI KASUTAMINE
+   - Süsteem kasutab AI-d andmete ekstraktimiseks
+   - AI soovitused EI OLE automaatsed otsused
+   - Kasutaja vastutab kõigi kinnituste eest
+   - Madala kindlusega tulemused nõuavad ülevaatust
 
-4. VASTUTUSE PIIRAMINE
-   - KLAARIKS ei vastuta maksunõustamise eest
+4. ANDMED JA PRIVAATSUS
+   - Viide privaatsuspoliitikale
+   - Andmete säilitamine vastavalt seadusele
+   - Kasutaja õigus andmeid eksportida
+
+5. VASTUTUSE PIIRAMINE
+   - KLAARIKS ei vastuta raamatupidamisvigade eest
    - Kasutaja vastutab oma otsuste eest
    - Maksimaalne kahju: teenustasu tagastamine
 
-5. LÕPETAMINE
+6. LÕPETAMINE
    - Kasutaja võib igal ajal lõpetada
    - Andmete eksport 30 päeva jooksul
    - Andmete kustutamine GDPR alusel
 
-6. VAIDLUSTE LAHENDAMINE
-   - Eesti seadused
+7. MUUDATUSED
+   - Teavitame muudatustest ette
+   - Jätkuv kasutamine = nõustumine
+
+8. KOHALDATAV ÕIGUS
+   - Eesti Vabariigi seadused
    - Harju Maakohus
 ```
 
-### Implementatsioon
-
-```typescript
-// components/TermsConsent.tsx
-interface ConsentState {
-  termsAccepted: boolean;
-  privacyAccepted: boolean;
-  timestamp: Date;
-  ipAddress: string;
-  userAgent: string;
-}
-```
-
----
-
-## 📋 2. Privaatsuspoliitika (Privacy Policy)
-
-### GDPR Nõuded
+### 2. Privaatsuspoliitika (Privacy Policy)
 
 ```markdown
-PRIVAATSUSPOLIITIKA
+KLAARIKS PRIVAATSUSPOLIITIKA
 
 1. VASTUTAV TÖÖTLEJA
-   KLAARIKS OÜ
-   Registrikood: XXXXXXXX
+   [KLAARIKS OÜ]
+   Registrikood: [...]
    E-post: privacy@klaariks.ee
 
-2. TÖÖDELDAVAD ANDMED
-   - Isikuandmed: nimi, isikukood, e-post
-   - Ettevõtte andmed: registrikood, finantsandmed
-   - Pangaandmed: kontoväljavõtted (kui ühendatud)
-   - Kasutusandmed: logid, sessioonid
+2. KOGUTAVAD ANDMED
+
+   Isikuandmed:
+   - Nimi, isikukood (autentimisest)
+   - E-posti aadress
+   - IP-aadress, seadme info
+
+   Ettevõtte andmed:
+   - Registrikood, ärinimi
+   - KMKR staatus
+   - Üleslaetud dokumendid
+   - Pangaväljavõtted (kui imporditud)
+
+   Kasutusandmed:
+   - Logid, sessioonid
+   - Tegevuste ajalugu
 
 3. TÖÖTLEMISE EESMÄRK
    - Teenuse osutamine
+   - AI mudeli treenimine (anonümiseeritult)
    - Klienditugi
-   - Teenuse arendamine (anonümiseeritult)
+   - Seadusjärgne säilitamine
 
-4. ANDMETE SÄILITAMINE
-   - Aktiivsed andmed: teenuse kehtivuse ajal
-   - Finantsandmed: 7 aastat (seadusest)
+4. TÖÖTLEMISE ALUS
+   - Lepingu täitmine (Art 6(1)(b))
+   - Seadusest tulenev kohustus (Art 6(1)(c))
+   - Nõusolek (Art 6(1)(a)) - tagasivõetav
+
+5. ANDMETE SÄILITAMINE
+   - Aktiivsed andmed: lepingu kehtivuse ajal
+   - Finantsandmed: 7 aastat (RPS)
    - Logid: 1 aasta
+   - Pärast: turvaline kustutamine
 
-5. KASUTAJA ÕIGUSED
-   - Juurdepääs oma andmetele
-   - Andmete parandamine
-   - Andmete kustutamine (õigus olla unustatud)
-   - Andmete ülekandmine
-   - Töötlemise piiramine
-   - Vastuväite esitamine
+6. ANDMETE JAGAMINE
+   - Pilveplatvormid (AWS/GCP) - töötlejana
+   - AI teenused - anonümiseeritult
+   - Riigiasutused - seaduse alusel
+   - EI MÜÜA kolmandatele osapooltele
 
-6. KONTAKT
+7. KASUTAJA ÕIGUSED (GDPR)
+   - Juurdepääs (Art 15)
+   - Parandamine (Art 16)
+   - Kustutamine (Art 17)
+   - Ülekandmine (Art 20)
+   - Vastuväide (Art 21)
+   - Piiramine (Art 18)
+
+8. TURVALISUS
+   - Krüpteerimine (rest + transit)
+   - Ligipääsukontroll
+   - Regulaarsed auditid
+
+9. KONTAKT
    E-post: privacy@klaariks.ee
-   Vastame 30 päeva jooksul
+   Vastame: 30 päeva
+
+10. KAEBUSED
+    Andmekaitse Inspektsioon
+    www.aki.ee
+```
+
+### 3. Andmetöötluse Nõusolek
+
+```markdown
+ANDMETÖÖTLUSE NÕUSOLEK
+
+Nõustun, et KLAARIKS töötleb minu ja minu ettevõtte andmeid 
+järgmistel eesmärkidel:
+
+☐ Üleslaetud dokumentide automaatne analüüs AI abil
+☐ Pangaväljavõtete import ja töötlemine
+☐ Tehingute kategoriseerimine ja soovituste andmine
+☐ Andmete eksportimine raamatupidajale (kui valin)
+
+Mõistan, et:
+- Saan nõusoleku igal ajal tagasi võtta
+- Tagasivõtmine ei mõjuta eelnevat töötlemist
+- Mul on õigus oma andmetele ligi pääseda
+- Mul on õigus nõuda andmete kustutamist
+
+[Checkbox] Nõustun ülaltoodud tingimustega
 ```
 
 ---
 
-## 📋 3. EMTA Volikiri
+## 🔮 Tulevased Faasid — Volikirjad
 
-### Variant A: e-MTA kaudu (soovituslik)
+### v1: EMTA Integratsioon
 
-**Protsess kasutaja jaoks:**
+**Millal vaja?** Kui hakkame e-MTA-st andmeid lugema/esitama.
 
-1. Logi sisse [e-MTA portaali](https://www.emta.ee/e-mta)
-2. Mine: **Seaded** → **Volituste haldamine**
-3. Kliki: **Lisa uus volitus**
-4. Sisesta volitatava andmed:
-   - Registrikood: KLAARIKS OÜ reg.kood
-   - Nimi: KLAARIKS OÜ
-5. Vali volituse tüüp:
-   - ☑️ Vaatamise õigus
-   - ☑️ Esitamise õigus (kui soovitud)
-6. Määra kehtivusaeg
-7. Kinnita ID-kaardi/Mobiil-ID-ga
+**Protsess:**
 
-**KLAARIKS-i jaoks nähtav:**
-- Pärast volituse andmist näeme X-tee kaudu maksuandmeid
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EMTA VOLIKIRI                                              │
+│                                                             │
+│  Variant A: e-MTA kaudu (soovituslik)                       │
+│  ├── Kasutaja logib e-MTA-sse                               │
+│  ├── Seaded → Volitused → Lisa volitus                      │
+│  ├── Sisestab KLAARIKS reg.koodi                            │
+│  └── Kinnitab Smart-ID-ga                                   │
+│                                                             │
+│  Variant B: Digitaalne volikiri                             │
+│  ├── KLAARIKS genereerib PDF                                │
+│  ├── Kasutaja allkirjastab DigiDoc-is                       │
+│  └── KLAARIKS esitab EMTA-le                                │
+│                                                             │
+│  Õigused:                                                   │
+│  ☐ Deklaratsioonide vaatamine                               │
+│  ☐ Maksukonto seisu pärimine                                │
+│  ☐ Deklaratsioonide esitamine (valikuline)                  │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Variant B: Digitaalne Volikiri
+**Volikirja Näidis:**
 
-```markdown
+```
 VOLIKIRI
 MAKSU- JA TOLLIAMETILE
 
 Volitaja:
-[ETTEVÕTTE NIMI]
-Registrikood: [XXXXXXXX]
-Aadress: [AADRESS]
+[ETTEVÕTTE NIMI], registrikood [XXXXXXXX]
 Esindaja: [NIMI], isikukood [XXXXXXXXXXX]
 
-Volitab käesolevaga:
+Volitab:
+KLAARIKS OÜ, registrikood [XXXXXXXX]
 
-KLAARIKS OÜ
-Registrikood: [XXXXXXXX]
-Aadress: [AADRESS]
+Toimingud:
+1. Maksudeklaratsioonide pärimine ja vaatamine
+2. Maksukonto seisu pärimine
+3. [Valikuline: esitamine]
 
-järgmiste toimingute teostamiseks Maksu- ja Tolliametis:
+Kehtivus: [kuupäev] kuni tagasivõtmiseni
 
-1. Maksudeklaratsioonide ja -aruannete pärimine ja vaatamine
-2. Maksukonto seisu ja ajaloo pärimine
-3. Maksuteadete ja otsuste kättesaamine
-4. [Valikuline: Deklaratsioonide esitamine volitaja nimel]
-
-Käesolev volitus kehtib alates [KUUPÄEV] kuni [KUUPÄEV] / 
-on tähtajatu ja kehtib kuni tagasivõtmiseni.
-
-Volitaja kinnitan, et olen [ETTEVÕTTE NIMI] seaduslik esindaja
-ja mul on õigus volitusi anda.
-
-[KUUPÄEV]
-
-________________________
-[Volitaja nimi]
 [Digitaalallkiri]
 ```
 
-### Implementatsioon KLAARIKS-is
+---
 
-```typescript
-// services/emtaService.ts
+### v1: Pangaühendus (PSD2)
 
-interface EmtaVoikiriRequest {
-  companyRegCode: string;
-  companyName: string;
-  representativeName: string;
-  representativeIdCode: string;
-  permissions: ('view' | 'submit')[];
-  validFrom: Date;
-  validUntil?: Date; // undefined = tähtajatu
-}
+**Millal vaja?** Kui läheme manuaalselt impordilt üle automaatsele.
 
-async function generateEmtaVoikiri(request: EmtaVoikiriRequest): Promise<Blob> {
-  // Genereerib PDF volikirja DigiDoc allkirjastamiseks
-}
+**Protsess:**
 
-async function checkEmtaPermissions(companyRegCode: string): Promise<{
-  hasAccess: boolean;
-  permissions: string[];
-  validUntil?: Date;
-}> {
-  // Kontrollib X-tee kaudu, kas meil on ligipääs
-}
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PSD2 CONSENT FLOW                                          │
+│                                                             │
+│  1. Kasutaja valib panga (LHV, Swedbank, SEB, Coop)         │
+│  2. Redirect panga lehele                                   │
+│  3. Autentimine (Smart-ID)                                  │
+│  4. Consent kinnitamine:                                    │
+│     "Luban KLAARIKS-il lugeda minu kontoseisu ja            │
+│      tehingute ajalugu järgmiseks 90 päevaks"               │
+│  5. Redirect tagasi KLAARIKS-i                              │
+│  6. Token salvestamine                                      │
+│  7. Andmete sünkroonimine                                   │
+│                                                             │
+│  ⚠️ Consent kehtib 90 päeva, siis uuendamine                │
+│  ⚠️ Vajab AISP litsentsi või partnerlust                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Alternatiiv: Partnerlus**
+- Nordigen, Plaid, Tink - juba litsentseeritud
+- Kiirem turule jõudmine
+- Vähem regulatiivset koormat
+
+---
+
+### v1+: Raamatupidaja Leping
+
+**Millal vaja?** Kui raamatupidajal on in-app ligipääs (mitte ainult export).
+
+```
+RAAMATUPIDAJA LIGIPÄÄSU LEPING
+
+Pooled:
+1. [Ettevõtte nimi] (klient)
+2. [Raamatupidaja nimi/ettevõte]
+
+Ligipääsu ulatus:
+☐ Read-only vaatamine
+☐ Kommenteerimine
+☐ [Tulevikus: muutmine]
+
+Konfidentsiaalsus:
+- Andmeid ei jagata kolmandatele
+- Ligipääs lõpeb lepingu lõppemisel
+
+[Digitaalallkirjad]
 ```
 
 ---
 
-## 📋 4. Pangaühenduse Nõusolek (PSD2)
+## 📊 Kokkuvõte: Millal Mida Vaja
 
-### Open Banking Consent Flow
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  1. KASUTAJA ALGATAB                                     │
-│     └── Klikib "Ühenda pangakonto"                       │
-│                                                          │
-│  2. PANGA VALIK                                          │
-│     └── LHV / Swedbank / SEB / Coop                      │
-│                                                          │
-│  3. REDIRECT PANGA LEHELE                                │
-│     └── Panga autentimisleht                             │
-│                                                          │
-│  4. KASUTAJA AUTENDIB                                    │
-│     └── Smart-ID / Mobiil-ID / PIN-kalkulaator           │
-│                                                          │
-│  5. CONSENT KINNITAMINE                                  │
-│     └── "Luban KLAARIKS-il lugeda minu kontoseisu        │
-│          ja tehingute ajalugu järgmiseks 90 päevaks"     │
-│                                                          │
-│  6. REDIRECT TAGASI KLAARIKS-I                           │
-│     └── Saame: authorization_code                        │
-│                                                          │
-│  7. TOKEN VAHETUS                                        │
-│     └── code → access_token + refresh_token              │
-│                                                          │
-│  8. ANDMETE PÄRIMINE                                     │
-│     └── Kontod, tehingud, saldod                         │
-└──────────────────────────────────────────────────────────┘
-```
-
-### MVP Alternatiiv (ilma PSD2-ta)
-
-```typescript
-// Kasutaja laeb üles pangaväljavõtte
-interface ManualBankImport {
-  type: 'csv' | 'pdf' | 'xml';
-  bank: 'lhv' | 'swedbank' | 'seb' | 'coop';
-  file: File;
-  consent: {
-    confirmed: boolean; // "Kinnitan, et need on minu andmed"
-    timestamp: Date;
-  };
-}
-```
+| Faas | Dokument | Meetod | Kuhu |
+|------|----------|--------|------|
+| **v0** | Kasutustingimused | Checkbox | KLAARIKS |
+| **v0** | Privaatsuspoliitika | Checkbox | KLAARIKS |
+| **v0** | Andmetöötluse nõusolek | Checkbox | KLAARIKS |
+| **v1** | EMTA volikiri | e-MTA / DigiDoc | EMTA |
+| **v1** | Pangaühenduse consent | Panga süsteem | Pank |
+| **v1+** | Raamatupidaja leping | DigiDoc | KLAARIKS |
+| **v1+** | Teenuse leping (B2B) | DigiDoc | KLAARIKS |
 
 ---
 
-## 📋 5. Teenuse Leping (Faas 2)
+## ✅ v0 Implementatsiooni Checklist
 
-### Struktuur
+### Dokumendid kirjutada
+- [ ] Kasutustingimused (EST tekst)
+- [ ] Privaatsuspoliitika (EST tekst)
+- [ ] Andmetöötluse nõusolek (EST tekst)
 
-```markdown
-KLAARIKS TEENUSE LEPING
+### UI komponendid
+- [ ] ConsentCheckbox komponent
+- [ ] Tingimuste modaal (täistekst)
+- [ ] Consent history vaade (seaded)
 
-POOLED:
-1. KLAARIKS OÜ (teenusepakkuja)
-2. [Kliendi ettevõte] (klient)
-
-TEENUSE KIRJELDUS:
-- Finantsülevaadete platvorm
-- Pangaintegratsioon
-- AI-põhine analüüs
-- Maksukalkulatsioonid
-
-HIND:
-- Baaspakett: XX €/kuu
-- Pro pakett: XX €/kuu
-- Arveldusperiood: kuine
-
-VASTUTUS:
-- Teenusepakkuja vastutab andmeturbe eest
-- Klient vastutab sisestatud andmete õigsuse eest
-- Maksimaalne kahju: 12 kuu teenustasu
-
-KONFIDENTSIAALSUS:
-- Ärisaladuste hoidmine
-- Andmete mitte-avalikustamine
-
-KEHTIVUS:
-- Algab allkirjastamisest
-- Tähtajatu, 1 kuu etteteatamisega lõpetatav
-
-ALLKIRJAD:
-[Digitaalallkirjad mõlemalt poolelt]
-```
-
----
-
-## 🔧 Tehniline Implementatsioon
-
-### Consent Management System
-
-```typescript
-// types/consent.ts
-
-interface ConsentRecord {
-  id: string;
-  userId: string;
-  companyId: string;
-  consentType: 
-    | 'terms_of_service'
-    | 'privacy_policy'
-    | 'data_processing'
-    | 'emta_authorization'
-    | 'bank_connection'
-    | 'accountant_access';
-  version: string;
-  status: 'active' | 'withdrawn' | 'expired';
-  grantedAt: Date;
-  withdrawnAt?: Date;
-  expiresAt?: Date;
-  metadata: {
-    ipAddress: string;
-    userAgent: string;
-    method: 'checkbox' | 'digidoc' | 'bank_redirect';
-  };
-}
-
-// Audit trail
-interface ConsentAuditLog {
-  consentId: string;
-  action: 'granted' | 'withdrawn' | 'renewed' | 'viewed';
-  timestamp: Date;
-  actor: string;
-  details: string;
-}
-```
-
-### UI Komponendid
-
-```typescript
-// components/consent/ConsentCheckbox.tsx
-interface ConsentCheckboxProps {
-  consentType: string;
-  label: string;
-  documentUrl: string; // Link täistekstile
-  required: boolean;
-  onChange: (accepted: boolean) => void;
-}
-
-// components/consent/ConsentModal.tsx
-interface ConsentModalProps {
-  title: string;
-  content: string; // Markdown
-  onAccept: () => void;
-  onDecline: () => void;
-}
-
-// components/consent/ConsentHistory.tsx
-// Näitab kasutajale tema antud nõusolekuid
-// Võimaldab tagasi võtta
-```
-
----
-
-## ✅ Checklist MVP-ks
-
-### Dokumendid
-- [ ] Kasutustingimused (EST)
-- [ ] Privaatsuspoliitika (EST)
-- [ ] Andmetöötluse nõusolek tekst
-
-### Kood
-- [ ] Consent management süsteem
-- [ ] Checkbox komponendid
+### Backend
 - [ ] Consent salvestamine DB-sse
-- [ ] Consent ajalugu vaade
+- [ ] Versioonihaldus (dokumendi versioon)
+- [ ] Audit log (kes, millal nõustus)
 
 ### Juriidiline
-- [ ] Jurist vaatab üle kasutustingimused
+- [ ] Jurist vaatab üle
 - [ ] GDPR vastavuse kontroll
-- [ ] Andmekaitse Inspektsioon (kui vajalik)
 
 ---
 
 *Viimati uuendatud: Jaanuar 2026*
+*Põhineb: PRD v0*
