@@ -1,0 +1,403 @@
+﻿PRD v0 — AI-assisted accounting for Estonian micro-businesses
+1. Purpose of this PRD
+Define the smallest credible product that:
+* Brings real value to real companies
+* Can be used internally by an accounting firm with existing clients
+* Proves automation + UX assumptions before public launch
+* Is secure, explainable, and scalable by design (not hacked together)
+This is not a launch PRD. This is a validation PRD.
+________________
+
+
+2. Product vision (internal)
+A system that silently does daily bookkeeping work and only interrupts when something is missing, wrong, or risky.
+Success means:
+* Small business owners can confidently handle day-to-day accounting themselves
+* Accounting concepts are understandable without prior training
+* An accountant is optional and used mainly for review or edge cases
+* Month-end becomes boring
+________________
+
+
+3. Target user (v0)
+Primary user
+Small business owner (1–3 people OÜ)
+* Not an accountant
+* Wants clarity and peace of mind, not accounting theory
+* Will do day-to-day bookkeeping if guided safely
+* Needs clear signals when something is wrong or missing
+Secondary user
+Professional accountant (optional)
+* Used for review, correction, or annual reporting
+* Needs clean exports and traceability
+* Does not operate the system daily
+________________
+
+
+4. Non-goals (locked)
+The MVP explicitly does not:
+* Require a daily accountant
+* Replace certified accounting judgment in complex cases
+* Submit anything to e-MTA
+* Handle inventory
+* Handle payroll
+* Handle projects / objects
+* Support multiple companies per account
+* Offer fully self-serve public onboarding
+Any feature contradicting this is out of scope.
+________________
+
+
+5. Core hypothesis to validate
+If we centralize documents + bank data and apply AI-assisted classification, we can reduce manual bookkeeping effort by 50–70% for simple companies.
+Secondary hypotheses:
+* Most invoices can be auto-classified with high confidence
+* “Attention required” UI is more valuable than dashboards
+* Explainability is more important than full automation
+________________
+
+
+6. MVP user model
+Accounts & access
+* 1 account = 1 company (hard rule)
+* 1 primary user = company owner
+* Optional accountant access:
+   * Read-only
+   * Export-based handoff
+* No shared dashboards yet
+Reasoning:
+* Optimizes for owner-first usage
+* Keeps permissions simple and safe
+* Allows accountant involvement without dependency
+________________
+
+
+7. Data scope (v0)
+Required inputs
+Purchase invoices (critical)
+* PDF
+* Image
+* Manual upload is sufficient
+Bank transactions
+* CSV
+* PDF
+* XML (optional)
+* Manual import only
+Sales invoices
+* Imported only (PDF / Excel)
+* Creation is out of scope
+Derived data (system-owned)
+* Parsed invoice fields
+* VAT treatment
+* Account suggestion
+* Matching confidence
+* Flags / issues
+________________
+
+
+8. Core features (MVP)
+8.1 Document ingestion
+* Upload documents
+* Processing states (v0):
+   * pending
+   * processing
+   * review
+   * accepted
+   * failed (retryable)
+8.2 AI extraction (assistive)
+* Extract vendor, date, total, VAT amount, VAT rate
+* Provide confidence score
+* Never auto-commit silently
+8.3 Categorization
+* Suggest account (konto plaan)
+* Suggest VAT treatment
+* Quick override
+* Remember overrides (learning loop)
+8.4 Bank matching
+* Match transactions to invoices
+* Detect missing invoices and unmatched payments
+* Show matching rationale
+8.5 Attention system (core UX)
+Single list of:
+* Missing documents
+* Low-confidence invoices
+* Unmatched payments
+* Upcoming VAT obligations (informational)
+No dashboards required.
+________________
+
+
+9. Outputs (read-only)
+Accounting exports
+* General ledger
+* Journal
+* Document archive
+Reports (light)
+* VAT summary preview
+* Cashflow snapshot
+* “Is something wrong?” indicator
+________________
+
+
+10. UX principles (non-negotiable)
+* No accounting jargon unless necessary
+* Every number is traceable
+* System communicates via states, not dense reports
+* Fast review > perfect automation
+* Design system first: shadcn-first, token-only, light+dark from day one
+* Keep layouts spacious and minimal; only 2 size variants (sm + default) in v0
+________________
+
+
+10a. UX safety model (owner-first)
+The system must allow non-accountants to operate safely without the risk of breaking accounting correctness.
+Core safety principles
+* Owners never edit the ledger directly
+* All critical accounting state is derived, not manually entered
+* AI can suggest, never silently decide
+* Every action is reversible
+* Uncertainty always escalates to a question
+User capability tiers
+What the owner CAN do
+* Upload and delete documents
+* Confirm or correct extracted invoice data
+* Accept or override suggested categories and VAT treatments
+* Match or unmatch bank transactions
+* View VAT and cashflow previews
+* Export data for accountant handoff
+What the owner CANNOT do
+* Manually post ledger entries
+* Modify tax calculations directly
+* Close accounting periods
+* Override system warnings without acknowledgement
+System states (primary UX)
+1. All good
+   * All documents processed
+   * No low-confidence items
+   * No missing transactions
+2. Needs attention
+   * Missing document
+   * Low-confidence extraction
+   * Unmatched payment
+   * Inconsistent data
+3. Blocked / unclear
+   * Critical uncertainty (e.g. VAT treatment unclear)
+   * System requires owner input before proceeding
+Confidence handling
+* Confidence is communicated using labels:
+   * High
+   * Medium
+   * Low
+* Low confidence always triggers a question or review task
+Error prevention & recovery
+* No destructive actions without confirmation
+* All overrides are logged
+* Previous system suggestion is always visible
+* Owner can revert to system suggestion
+Accountant escalation
+* At any point, the owner can:
+   * Export a handoff ZIP
+   * Share context with an accountant
+* The system must never require accountant intervention for basic progress
+________________
+
+
+10b. Data model & ledger derivation (v0)
+This section defines the minimum data model and the rules that enforce the UX safety model.
+Data model principles
+* Every record is scoped to a company (future-proofing multi-company)
+* Documents and bank transactions are sources of truth
+* Accounting outputs (ledger, VAT summaries) are derived views
+* AI outputs are stored as suggestions, never as authoritative data
+* All changes are traceable via an audit/event log
+Core entities (v0)
+1) Identity & access
+* User
+   * id, email, name, auth_provider, created_at
+* Company
+   * id, registry_code, name, vat_registered, created_at
+* Membership (even if v0 UI is 1 user)
+   * id, company_id, user_id, role (owner, accountant_readonly, viewer), created_at
+v0 constraint: enforce 1 owner membership per company in the UI/business logic, but keep the table for v1.
+2) Documents
+* Document
+   * id, company_id, type (purchase_invoice, sales_invoice, receipt, other)
+   * source (upload, email_future, integration_future)
+   * file_key, status (pending, processing, review, accepted, failed)
+   * issued_at, counterparty_name, counterparty_reg_code (optional)
+   * currency, total_gross, total_vat, total_net
+   * vat_treatment (standard, reverse_charge, exempt, unknown)
+   * created_at, updated_at
+* DocumentLine (optional in v0; required later for inventory/projects)
+   * id, document_id, description, quantity, unit_price, line_total, vat_rate
+3) Bank transactions
+* Transaction
+   * id, company_id, bank_source (manual_import)
+   * posted_at, amount, currency, description, counterparty (string)
+   * reference, bank_account_iban (optional)
+   * created_at
+4) Matching
+* Match
+   * id, company_id, document_id, transaction_id
+   * match_type (payment, receipt)
+   * confidence_label (high, medium, low)
+   * status (suggested, confirmed, rejected)
+   * created_at
+5) Categorization & AI suggestions
+* Suggestion
+   * id, company_id, subject_type (document, transaction)
+   * subject_id
+   * suggestion_type (extraction_field, account_category, vat_treatment, match)
+   * payload_json
+   * confidence_label (high, medium, low)
+   * status (pending, accepted, overridden)
+   * model_version / rule_version, created_at
+* OwnerOverride
+   * id, company_id, subject_type, subject_id
+   * field (e.g., total_vat, issued_at, vat_treatment, category)
+   * old_value, new_value, created_at
+6) Periods & outputs
+* TaxPeriod
+   * id, company_id, period_start, period_end
+   * status (open, review_ready)
+* ExportPackage (accountant handoff)
+   * id, company_id, tax_period_id (nullable)
+   * format (zip)
+   * file_key, created_at
+7) Auditability
+* AuditEvent
+   * id, company_id, actor_user_id (nullable for system)
+   * event_type (upload, parse, suggestion_created, suggestion_accepted, override_created, match_confirmed, export_created)
+   * subject_type, subject_id
+   * payload_json, created_at
+Derived accounting views (v0)
+v0 does not expose manual ledger posting. Instead it generates:
+* Journal view: derived postings per accepted document and confirmed matches
+* General ledger view: aggregation of journal lines by account
+* VAT summary preview: totals computed from accepted documents by VAT treatment
+Implementation rule:
+* The exported “ledger/journal” is produced by a deterministic function:
+   * Inputs: accepted documents + owner overrides + confirmed matches + chart-of-accounts mapping
+   * Output: journal lines (read-only)
+Mutability rules (enforced)
+* Mutable by owner:
+   * Document fields (within allowed set) via overrides
+   * Match confirmation/rejection
+   * Category/VAT treatment selection
+* Immutable/system-only:
+   * Transaction raw import record (append-only; allow re-import as new batch)
+   * Audit events
+   * Export packages
+Open items to resolve with accountant (v0→v1)
+* Chart of accounts mapping approach (simple categories vs full kontoplaan)
+* VAT treatment taxonomy needed for Estonia (minimum set for v0)
+* “Invoice vs bank disagreement” rule set and escalation
+________________
+
+
+11. Security & compliance (MVP level)
+Must-have
+* Data isolation per company
+* Encrypted storage (at rest)
+* Secure authentication
+* Basic audit log (who changed what, when)
+Authentication (open decisions)
+* Primary option under consideration: Smart-ID / national e-ID (trusted, secure)
+* Alternative options (open): email magic link, password + 2FA
+* 2FA not required in v0 if Smart-ID is used
+Not required yet
+* SOC2 / ISO certifications
+Architecture must not block future compliance.
+________________
+
+
+12. Scalability assumptions
+Target scale for v0–v1:
+* 10–50 companies (v0)
+* Hundreds of companies (early v1)
+* Thousands of documents per month
+* Async processing is required
+* No real-time guarantees
+Design implications:
+* Background jobs for OCR / AI processing
+* Idempotent, retryable pipelines
+* All data scoped by company_id
+* Storage paths partitioned by company
+* Role-based access model, even if limited in v0
+________________
+
+
+13. Success criteria (internal MVP)
+This MVP is successful if:
+* Real company owners can use it without accountant help
+* Day-to-day bookkeeping is completed by non-experts
+* Accountants only step in for review or edge cases
+* At least one full VAT period is completed with confidence
+* Trust increases over time (fewer corrections)
+Failure equals learning, not waste.
+________________
+
+
+14. Explicitly deferred (v1+)
+* Pricing enforcement
+* Client-facing UI
+* Multi-company accounts
+* Payroll
+* e-MTA integration
+* Inventory / projects
+* AI chat assistant
+________________
+
+
+15. Open decisions & captured assumptions
+Access & users
+1. Accountant access is invite-only by email
+2. Accountant access in early versions is information handoff only (exports), not in-app editing
+3. Multi-user and multi-company accounts are future v1+, but data model must support them
+Company onboarding
+4. Company creation should use Estonian business registry lookup (required for real customers)
+5. Fiscal year customization is out of scope for v0
+Accounting logic
+6. Source of truth when invoice and bank data disagree is open (to be defined with accountant)
+7. Chart of accounts strategy is open and must be defined with accounting partner
+8. Rules for editing parsed invoice fields by owners are open
+Accountant handoff
+9. v0 handoff format: ZIP archive containing:
+   * Original documents
+   * Ledger export
+   * Journal export
+   * VAT summary preview
+10. Incremental / diff-based exports are open
+Integrations & automation
+11. v0 supports manual imports only (banks, invoices)
+12. Bank integrations are v1
+13. Unique inbound invoice email per company is v1
+14. Estonian e-invoice (e-arve) support is future, not v0
+OCR & AI
+15. OCR latency of minutes is acceptable if accuracy is high
+16. Balance between OCR + AI extraction vs pure AI is open (hallucination risk acknowledged)
+17. Confidence should be communicated via labels (High / Medium / Low) initially
+18. If system confidence is low, the system must always ask the owner before proceeding
+Commercial & support
+19. Billing and pricing enforcement are out of scope for v0
+20. Nano-tier users will receive human support initially, growth is expected to be gradual
+________________
+
+
+16. Definition of v0 vs v1
+v0 — Internal validation MVP
+* Owner-first product used with real companies
+* Manual document and bank imports
+* AI-assisted extraction and categorization
+* Clear attention system
+* Export-based accountant handoff
+* No integrations, no submissions
+Primary goal: prove value and usability for non-accountants
+v1 — First public version
+* Self-serve onboarding
+* Bank integrations
+* Inbound invoice email
+* Optional accountant read-only access
+* Stronger automation defaults
+* Pricing plans enforced
+Primary goal: real customer adoption without daily accountant involvement
