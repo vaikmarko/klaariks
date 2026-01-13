@@ -3,14 +3,11 @@ import { AuthorizationStatus, AuthorizationType, CompanyProfile } from '../types
 import { 
     ExternalLink, 
     CheckCircle, 
-    Circle, 
     ArrowRight,
-    FileText,
     Building2,
     Calculator,
     ChevronDown,
     ChevronUp,
-    Shield,
     Info
 } from 'lucide-react';
 
@@ -32,7 +29,7 @@ interface AuthorizationItem {
 }
 
 export const AuthorizationGuide: React.FC<AuthorizationGuideProps> = ({
-    company,
+    company: _company,
     onComplete,
     onBack
 }) => {

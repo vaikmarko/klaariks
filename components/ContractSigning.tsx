@@ -14,8 +14,7 @@ import {
 import { 
     initiateSigning, 
     checkSigningStatus, 
-    generateContractText,
-    setDokobitAccessToken 
+    generateContractText
 } from '../services/dokobitService';
 
 interface ContractSigningProps {
@@ -40,7 +39,7 @@ export const ContractSigning: React.FC<ContractSigningProps> = ({
     const [phoneNumber, setPhoneNumber] = useState('');
     const [controlCode, setControlCode] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [signingToken, setSigningToken] = useState<string | null>(null);
+    const [_signingToken, setSigningToken] = useState<string | null>(null);
     const [contract, setContract] = useState<ServiceContract | null>(null);
     const [showContract, setShowContract] = useState(false);
     const [selectedRep, setSelectedRep] = useState<RikPerson | null>(null);
@@ -202,7 +201,7 @@ export const ContractSigning: React.FC<ContractSigningProps> = ({
         };
 
         checkStatus();
-    }, [method, contract, personalCode]);
+    }, [method, contract, personalCode, selectedRep]);
 
     // Lepingu tekst preview jaoks
     const contractText = contract 
