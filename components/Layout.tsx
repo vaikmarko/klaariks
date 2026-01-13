@@ -1,15 +1,16 @@
 import React, { ReactNode, useState, useRef, useEffect } from 'react';
 import { Page, ChatMessage } from '../types';
-import { LayoutDashboard, FileText, Receipt, Calculator, Settings, Menu, X, Bell, Wallet, Sparkles, Bot, Send } from 'lucide-react';
+import { LayoutDashboard, FileText, Receipt, Calculator, Settings, Menu, X, Bell, Wallet, Sparkles, Bot, Send, LogOut } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
   currentPage: Page;
   onNavigate: (page: Page) => void;
   companyName: string;
+  onLogout?: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate, companyName }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate, companyName, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Chat State
@@ -127,11 +128,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
             </button>
           </nav>
 
-          <div className="mt-auto pt-6 border-t border-slate-100">
+          <div className="mt-auto pt-6 border-t border-slate-100 space-y-1">
              <button className="flex items-center w-full px-4 py-2 text-sm text-slate-500 hover:text-emerald-600">
                 <Bell size={18} className="mr-3" />
                 Teavitused <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">2</span>
              </button>
+             {onLogout && (
+               <button 
+                 onClick={onLogout}
+                 className="flex items-center w-full px-4 py-2 text-sm text-slate-500 hover:text-red-600 transition-colors"
+               >
+                  <LogOut size={18} className="mr-3" />
+                  Logi välja
+               </button>
+             )}
           </div>
         </div>
       </aside>

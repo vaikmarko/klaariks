@@ -37,11 +37,18 @@ function App() {
     }
   };
 
+  const handleLogout = () => {
+    setIsOnboarded(false);
+    setCompany(null);
+    setCurrentPage(Page.DASHBOARD);
+  };
+
   return (
     <Layout 
         currentPage={currentPage} 
         onNavigate={setCurrentPage}
         companyName={company?.name || 'Sinu Ettevõte'}
+        onLogout={handleLogout}
     >
       {renderPage()}
     </Layout>
